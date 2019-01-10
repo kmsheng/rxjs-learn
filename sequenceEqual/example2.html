@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatatible" content="id=edge">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.3.3/rxjs.umd.min.js"></script>
+  <title>RxJS sequenceEqual example</title>
+</head>
+<body>
+  <input type="text" id="input" />
+  <div>password is abc</div>
+  <div id="result"></div>
+  <script>
+    const { fromEvent, from } = window.rxjs
+    const { sequenceEqual, bufferCount, pluck, mergeMap, tap } = window.rxjs.operators
+    const password$ = from(['a', 'b', 'c'])
+    const result = document.getElementById('result')
+    const setHtml = isEqualed => result.innerText = isEqualed ? 'Sequences are equaled' : 'Sequences are not equaled'
+    fromEvent(document.getElementById('input'), 'input')
+      .pipe(
+        pluck('data'),
+        bufferCount(3),
+        mergeMap(keys => {
+          return from(keys).pipe(
+            sequenceEqual(password$),
+            tap(isEqualed => setHtml(isEqualed))
+          )
+        })
+      )
+      .subscribe(console.log)
+  </script>
+</body>
+</html>
