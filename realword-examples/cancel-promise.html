@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatatible" content="id=edge">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.3.3/rxjs.umd.min.js"></script>
+  <title>Cancel a promise</title>
+</head>
+<body>
+  <button id="btn-fetch">fetch</button>
+  <button id="btn-cancel">cancel</button>
+  <div id="result"></div>
+  <script>
+    const { from, fromEvent } = window.rxjs
+    const { takeUntil, map, exhaustMap, tap } = window.rxjs.operators
+
+    const btnFetch = document.getElementById('btn-fetch')
+    const btnCancel = document.getElementById('btn-cancel')
+
+    const result = document.getElementById('result')
+    const fakeFetch = _ => new Promise(resolve => {
+      setTimeout(_ => resolve('data'), 5000)
+    })
+
+    btnCancelClick$ = fromEvent(document.getElementById('btn-cancel'), 'click')
+
+    btnCancelClick$.pipe(tap(res => result.innerText = 'aborted'))
+      .subscribe()
+
+    fromEvent(btnFetch, 'click')
+      .pipe(
+        tap(res => result.innerText = 'fetching...'),
+        exhaustMap(_ => {
+          return from(fakeFetch()).pipe(
+            takeUntil(btnCancelClick$),
+          )
+        }),
+        tap(res => result.innerText = res)
+      )
+      .subscribe(console.log)
+
+  </script>
+</body>
+</html>
